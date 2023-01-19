@@ -1,0 +1,66 @@
+version: '3.9'
+services:
+  # Sql Server
+
+  sqlserver:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    hostname: sqlserver
+    restart: unless-stopped
+    volumes:
+      - sql-data:/var/opt/mssql
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "${SQL_CONTAINER_SA_PASSWORD}"
+      TZ: "Europe/Rome"
+      MSSQL_COLLATION: "Latin1_General_CI_AS"
+    networks:
+      - sqlserver-net
+    mem_limit: 2GB
+
+  # RabbitMQ
+
+  rabmisc01:
+    image: rabbitmq:3.11.7-management
+    hostname: rabmisc01
+    restart: unless-stopped
+    volumes:
+      - rabmisc-data01:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      TZ: "Europe/Rome"
+    networks:
+      - rabbitmq-net
+
+  # Redis
+
+  redis01:
+    image: redis:7
+    restart: unless-stopped
+    volumes:
+      - redis-data01:/data
+    ports:
+      - "6379:6379"
+    environment:
+      TZ: "Europe/Rome"
+    networks:
+      - redis-net
+
+volumes:
+  sql-data:
+    driver: local
+  rabmisc-data01:
+    driver: local
+  redis-data01:
+    driver: local
+
+networks:
+  sqlserver-net:
+    driver: bridge
+  rabbitmq-net:
+    driver: bridge
+  redis-net:
+    driver: bridge
